@@ -1,0 +1,50 @@
+
+
+
+
+select * 
+,ROW_NUMBER () OVER (    PARTITION BY ''     ORDER BY     whenupdate asc,timeupdate  desc ) order_no
+,ROW_NUMBER () OVER (    PARTITION BY  submodel    ORDER BY     whenupdate asc,timeupdate  desc ) ordersubmodel
+from (
+------------------------------
+SELECT
+ c.reserveno,
+ c.reservedate,
+ A.submodel,
+ b.meaning,
+ A.unitprice,
+ A.qty,
+ A.totalprice,
+ A.discount,
+ A.discountamount,
+ A.vatrate,
+ A.vatamount, 
+ A.netprice,
+ C.amountpaid,
+ A.balanceqty,
+ A.productcode,   
+ c.idcardno,
+  (select   arname||'_'||lname    from    tblcustomer   where  customercode  = c.idcardno     )  customername   
+ ,a.colorcode
+ ,appointmentdate,appointtime,approvalby,appointremark,sendapprove,expdate,salecode,timeupdate,c.whenupdate,
+  ( SELECT receiveno FROM tblmstincome WHERE reserveno = c.orderno AND cancel = 'N' and receivetype = 'EX' LIMIT 1 ) ::TEXT AS receiveno,
+ c.saleno,
+ ( SELECT receiveno FROM tblmstincome WHERE reserveno = c.orderno AND cancel = 'N'  LIMIT 1 ) ::TEXT AS receiveno1
+ --,ROW_NUMBER () OVER (    PARTITION BY conno     ORDER BY       created_at desc ) nor
+FROM 
+
+ tbldtlrequestforms A,
+ tblsubmodel b ,
+ tblrequestforms c 
+WHERE
+      A.submodel =  b.submodel 
+    and c.orderno =   a.requestno
+ AND  a.requesttype  = 'RP'
+  and a.cancel  = 'N'
+ -- and c.saleno  = ''
+ -- and c.branchno  = '236'
+  and  c.reservedate   between '25670101' and '25681231' 
+  ) rece 
+  where  saleno  = ''
+  and receiveno is NULL 
+  and receiveno1 is not  null
